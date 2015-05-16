@@ -72,7 +72,7 @@ pm = new PowerMate()
 
 pm.on 'buttonDown', ->
   light = site.lights[0]
-  houmioSocket.emit 'apply/light', { _id: light._id, on: !light.on, bri: if light.on then 0 else 255 }
+  houmioSocket.emit 'apply/all', { _id: light._id, on: !light.on, bri: if light.on then 0 else 255 }
 
 deltas = Bacon.fromBinder (sink) ->
   pm.on 'wheelTurn', sink
@@ -83,4 +83,4 @@ deltas
   .map R.sum
   .map R.multiply(3)
   .onValue (bufferedDelta) ->
-    houmioSocket.emit 'apply/light', calculateNewLightState(site.lights[0], bufferedDelta)
+    houmioSocket.emit 'apply/all', calculateNewLightState(site.lights[0], bufferedDelta)
