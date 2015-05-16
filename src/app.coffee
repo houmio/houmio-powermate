@@ -5,6 +5,15 @@ unirest = require('unirest')
 winston = require('winston')
 R = require('ramda')
 
+houmioServer = process.env.HOUMIO_SERVER || "http://localhost:3000"
+houmioSiteKey = process.env.HOUMIO_SITEKEY || "devsite"
+
+unirest
+  .get houmioServer + "/api/site/" + houmioSiteKey
+  .headers {'Accept': 'application/json' }
+  .end (res) ->
+    global.site = res.body
+
 onHoumioSocketConnect = ->
   winston.info "Connected to #{houmioServer}"
   houmioSocket.emit "clientReady", { siteKey: houmioSiteKey }
@@ -28,22 +37,11 @@ onHoumioSocketDisconnect = ->
 onHoumioSocketUnknownSiteKey = (siteKey) ->
   exit "Server did not accept site key '#{siteKey}'"
 
-site = null
-
 onHoumioSocketSetLightState = (lightState) ->
-  light = R.find R.propEq('_id', lightState._id), site.lights
+  light = R.find R.propEq('_id', lightState._id), global.site.lights
   if light?
     light.on = lightState.on
     light.bri = lightState.bri
-
-houmioServer = process.env.HOUMIO_SERVER || "http://localhost:3000"
-houmioSiteKey = process.env.HOUMIO_SITEKEY || "devsite"
-
-unirest
-  .get houmioServer + "/api/site/" + houmioSiteKey
-  .headers {'Accept': 'application/json' }
-  .end (res) ->
-    site = res.body
 
 winston.info "Using HOUMIO_SERVER=#{houmioServer}"
 winston.info "Using HOUMIO_SITEKEY=#{houmioSiteKey}"
@@ -70,7 +68,7 @@ calculateNewLightState = (lightState, briDelta) ->
 pm = new PowerMate()
 
 pm.on 'buttonDown', ->
-  light = site.lights[0]
+  light = global.site.lights[0]
   houmioSocket.emit 'apply/all', { on: !light.on, bri: if light.on then 0 else 255 }
 
 deltas = Bacon.fromBinder (sink) ->
@@ -82,4 +80,4 @@ deltas
   .map R.sum
   .map R.multiply(3)
   .onValue (bufferedDelta) ->
-    houmioSocket.emit 'apply/all', calculateNewLightState(site.lights[0], bufferedDelta)
+    houmioSocket.emit 'apply/all', calculateNewLightState(global.site.lights[0], bufferedDelta)
