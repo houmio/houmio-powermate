@@ -63,16 +63,15 @@ exit = (msg) ->
   process.exit 1
 
 calculateNewLightState = (lightState, briDelta) ->
-  _id =  lightState._id
   bri = Math.max(Math.min(lightState.bri+briDelta, 255), 0)
   onB = !(bri is 0)
-  { _id: _id, bri: bri, on: onB }
+  { bri: bri, on: onB }
 
 pm = new PowerMate()
 
 pm.on 'buttonDown', ->
   light = site.lights[0]
-  houmioSocket.emit 'apply/all', { _id: light._id, on: !light.on, bri: if light.on then 0 else 255 }
+  houmioSocket.emit 'apply/all', { on: !light.on, bri: if light.on then 0 else 255 }
 
 deltas = Bacon.fromBinder (sink) ->
   pm.on 'wheelTurn', sink
