@@ -1,13 +1,8 @@
 {
   "name": "houmio-powermate",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "",
-  "license": "ISC",
+  "description": "Use Griffin PowerMate to control all of your lights",
+  "license": "MIT",
   "dependencies": {
     "baconjs": "^0.7.58",
     "node-hid": "^0.3.2",
