@@ -88,5 +88,5 @@ unirest
     wheelTurnsToDeltaStream(pm)
       .bufferWithTime(300)
       .map R.sum
-      .map R.multiply(3)
+      .map R.multiply(2)
       .onValue adjustAllLights(site, houmioSocket)
